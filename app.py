@@ -16,7 +16,7 @@ if HF_TOKEN:
     login(token=HF_TOKEN)
 
 st.set_page_config(page_title="🎙️ Accent & Transcriber", layout="centered")
-st.title("🎙️ YouTube/MP4 Accent & Speech Transcriber Built and managed by Derick Sajjad")
+st.title("🎙️Happy transcribing still training models for accent detection; Derick Sajjad")
 st.markdown("Paste a YouTube or direct MP4 video link to detect the accent and transcribe speech.")
 
 video_url = st.text_input("📹 Paste YouTube or Direct MP4 Video URL")
