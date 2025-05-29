@@ -9,35 +9,38 @@ from huggingface_hub import login
 from dotenv import load_dotenv
 import requests
 
-# Prevent Streamlit from crashing due to torch class loading
+# Disable Streamlit auto-reloader crash with torch
 os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
 
-# Load Hugging Face token from .env or environment
+# Load Hugging Face token
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 if HF_TOKEN:
     login(token=HF_TOKEN)
 
-# Streamlit UI setup
+# Set up Streamlit
 st.set_page_config(page_title="🎙️ Accent & Transcriber", layout="centered")
-st.title("🎙️ Happy Transcribing")
+st.title("🎙️Happy transcribing — still training models for accent detection")
 st.markdown("Paste a YouTube or direct MP4 video link to detect the accent and transcribe speech.")
-st.markdown("Training Data models for accurate accent detection , please be patient! 😅 suggestions? Email:ochiengderick12@gmail.com")
+
 video_url = st.text_input("📹 Paste YouTube or Direct MP4 Video URL")
 
-# Language code to flag mapping
+# Language code to flag emoji mapping
 flag_map = {
     "English": "🇬🇧", "en": "🇬🇧",
-    "Chinese_Taiwan": "🇹🇼", "French": "🇫🇷", "Hindi": "🇮🇳",
-    "Arabic": "🇸🇦", "Spanish": "🇪🇸",
+    "Chinese_Taiwan": "🇹🇼",
+    "French": "🇫🇷",
+    "Hindi": "🇮🇳",
+    "Arabic": "🇸🇦",
+    "Spanish": "🇪🇸",
     "Swahili": "🇰🇪", "Kiswahili": "🇰🇪"
 }
-
 def get_flag(lang_code):
     return flag_map.get(lang_code, "🌐")
 
-# Only working, verified model
+# Language ID models
 available_models = {
+    "VoxLingua107 (may fail)": "speechbrain/lang-id-voxlingua107",
     "CommonLanguage ECAPA": "speechbrain/lang-id-commonlanguage_ecapa"
 }
 selected_model = st.selectbox("🧠 Choose Language ID Model", list(available_models.keys()))
@@ -45,7 +48,7 @@ selected_model = st.selectbox("🧠 Choose Language ID Model", list(available_mo
 # Download and convert video to audio
 def download_audio(link, output_path="tmp/audio.wav"):
     os.makedirs("tmp", exist_ok=True)
-    ffmpeg_path = os.getenv("FFMPEG_PATH", "ffmpeg")
+    ffmpeg_path = os.getenv("FFMPEG_PATH", "ffmpeg")  # Use environment variable or fallback
 
     if link.endswith(".mp4"):
         r = requests.get(link, stream=True)
@@ -71,7 +74,7 @@ def download_audio(link, output_path="tmp/audio.wav"):
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([link])
 
-# Main logic
+# Main processing
 if video_url:
     audio_path = "tmp/audio.wav"
     with st.spinner("🔄 Processing video..."):
@@ -79,23 +82,22 @@ if video_url:
             download_audio(video_url, audio_path)
             st.success("✅ Audio extracted successfully!")
 
-            # Transcribe audio using Whisper
+            # Transcription
             st.subheader("📝 Transcription")
             whisper_model = whisper.load_model("base")
             result = whisper_model.transcribe(audio_path)
             transcription = result["text"]
             st.text_area("Transcript", transcription, height=180)
 
-            # Language Identification
+            # Accent / Language ID
             st.subheader("🌍 Accent / Language Identification")
-            try:
-                signal, fs = torchaudio.load(audio_path)
+            signal, fs = torchaudio.load(audio_path)
 
+            try:
                 classifier = EncoderClassifier.from_hparams(
                     source=available_models[selected_model],
                     savedir="tmp/lang-id"
                 )
-
                 prediction = classifier.classify_batch(signal)
                 lang = prediction[3][0]
                 confidence = prediction[1][0].item()
@@ -105,13 +107,13 @@ if video_url:
                 st.markdown(f"**Confidence Score:** `{confidence:.2f}`")
 
                 if any(word in transcription.lower() for word in ["the", "and", "you", "your", "have", "is", "are"]) and "en" not in lang.lower():
-                    st.warning("⚠️ Transcript appears to be English, but the model detected another language. Might be accent confusion or background noise.")
+                    st.warning("⚠️ The transcript appears to be in English, but the detected accent is not. This might be due to background noise or accent confusion.")
 
             except Exception as model_error:
-                st.error(f"❌ Classification failed: {str(model_error)}")
+                st.error(f"❌ Model failed to classify language: {str(model_error)}")
 
         except subprocess.CalledProcessError as ffmpeg_error:
             st.error(f"🚨 ffmpeg error: {str(ffmpeg_error)}")
 
         except Exception as e:
-            st.error(f"🚨 General error: {str(e)}")
+            st.error(f"🚨 Error: {str(e)}")
