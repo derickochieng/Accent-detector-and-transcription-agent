@@ -1,6 +1,6 @@
 streamlit
 openai-whisper
-torchaudio
+torchaudio==0.12.1
 yt-dlp
 speechbrain
 huggingface-hub
