@@ -20,9 +20,9 @@ if HF_TOKEN:
 
 # Streamlit UI setup
 st.set_page_config(page_title="🎙️ Accent & Transcriber", layout="centered")
-st.title("🎙️ Happy Transcribing — Accent Detection by Derick Sajjad")
+st.title("🎙️ Happy Transcribing")
 st.markdown("Paste a YouTube or direct MP4 video link to detect the accent and transcribe speech.")
-
+st.markdown("Training Data models for accurate accent detection , please be patient! 😅 suggestions? Email:ochiengderick12@gmail.com")
 video_url = st.text_input("📹 Paste YouTube or Direct MP4 Video URL")
 
 # Language code to flag mapping
