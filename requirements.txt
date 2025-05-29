@@ -3,5 +3,5 @@ whisper
 torchaudio
 yt-dlp
 speechbrain
-huggingface_hub
+huggingface-hub
 python-dotenv
