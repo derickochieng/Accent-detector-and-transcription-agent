@@ -1,2 +1,2 @@
-"[runtime]" 
-"pythonVersion = \"3.10\"" 
+[runtime] 
+pythonVersion = "3.10" 
