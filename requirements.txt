@@ -1,7 +1,7 @@
 streamlit
 openai-whisper
-torchaudio==0.12.1
+torchaudio==0.13.1
 yt-dlp
-speechbrain==0.5.14
+speechbrain
 huggingface-hub
 python-dotenv
