@@ -1,0 +1,8 @@
+streamlit
+whisper
+torchaudio
+yt-dlp
+speechbrain
+ffmpeg-python
+huggingface-hub
+python-dotenv
